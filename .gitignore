@@ -1,1 +1,4 @@
-
+*.ipynb
+.vscode/
+.ipynb_checkpoints/
+plot_sparse_logistic_regression_mnist.py

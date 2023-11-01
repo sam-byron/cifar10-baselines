@@ -1,6 +1,8 @@
+import tensorflow as tf
 from tensorflow.keras import datasets
+tf.get_logger().setLevel('ERROR')
+from sklearn import svm
 import numpy as np
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.utils import check_random_state
 from sklearn.preprocessing import StandardScaler
@@ -32,16 +34,18 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Turn up tolerance for faster convergence
-# clf = LogisticRegression(C=50.0 / train_samples, penalty="l1", solver="saga", tol=0.1, n_jobs=-1, multi_class='ovr')
-clf = LogisticRegression(multi_class='ovr', n_jobs=10)
-clf.fit(X_train, y_train)
+clf = svm.LinearSVC(verbose=1, max_iter=125)
 
-sparsity = np.mean(clf.coef_ == 0) * 100
-score = clf.score(X_test, y_test)
-# print('Best C % .4f' % clf.C_)
-print("Sparsity with L1 penalty: %.2f%%" % sparsity)
-print("Test score with L1 penalty: %.4f" % score)
+
+# clf = svm.SVC(gamma='auto', verbose=True)
+clf.fit(X_train, y_train.ravel())
+
+score = clf.score(X_test, y_test.ravel())
+print("Test score: %.4f" % score)
 
 run_time = time.time() - t0
 print("Example run in %.3f s" % run_time)
+
+# Total nSV = 35965
+# [LibSVM]Test score: 0.5404
+# Example run in 1890.111 s

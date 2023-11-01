@@ -1,9 +1,13 @@
+import tensorflow as tf
 from tensorflow.keras import datasets
+tf.get_logger().setLevel('ERROR')
+from sklearn import svm
 import numpy as np
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.utils import check_random_state
 from sklearn.preprocessing import StandardScaler
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.tree import DecisionTreeClassifier
 import time
 
 (train_images, train_labels), (test_images, test_labels) = datasets.cifar10.load_data()
@@ -16,7 +20,7 @@ class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', '
 
 # Turn down for faster convergence
 t0 = time.time()
-train_samples = 5000*8
+train_samples = 5000
 
 random_state = check_random_state(0)
 permutation = random_state.permutation(X.shape[0])
@@ -32,16 +36,17 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Turn up tolerance for faster convergence
-# clf = LogisticRegression(C=50.0 / train_samples, penalty="l1", solver="saga", tol=0.1, n_jobs=-1, multi_class='ovr')
-clf = LogisticRegression(multi_class='ovr', n_jobs=10)
-clf.fit(X_train, y_train)
+# clf = svm.LinearSVC(dual=False)
 
-sparsity = np.mean(clf.coef_ == 0) * 100
-score = clf.score(X_test, y_test)
-# print('Best C % .4f' % clf.C_)
-print("Sparsity with L1 penalty: %.2f%%" % sparsity)
-print("Test score with L1 penalty: %.4f" % score)
+n_estimators = 16
+clf = DecisionTreeClassifier()
+clf.fit(X, y.ravel())
+
+score = clf.score(X_test, y_test.ravel())
+print("Test score: %.4f" % score)
 
 run_time = time.time() - t0
 print("Example run in %.3f s" % run_time)
+
+# Test score: 0.1061
+# Example run in 340.294 s
